@@ -1,4 +1,5 @@
 package CGI::Application::Plugin::Header;
+use 5.008_009;
 use strict;
 use warnings;
 use parent 'Exporter';
