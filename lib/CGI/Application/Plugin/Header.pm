@@ -1,16 +1,18 @@
 package CGI::Application::Plugin::Header;
 use strict;
 use warnings;
+use parent 'Exporter';
 use CGI::Header;
 use Carp qw/croak/;
-use parent 'Exporter';
 
 our $VERSION = '0.01';
 
 our @EXPORT_OK = qw( header );
 
 sub import {
-    caller->add_callback( postrun => \&before_send_headers );
+    my $caller = caller;
+    $caller->new_hook('before_finalize_headers');
+    $caller->add_callback( postrun => \&finalize_headers );
     __PACKAGE__->export_to_level( 1, @_ );
 }
 
@@ -25,14 +27,13 @@ sub header {
     # make '__HEADER_PROPS' always refer to $header->header
     $self->{__HEADER_PROPS} = do {
         my $props = $header->header;
+        my $PROPS = $self->{__HEADER_PROPS};
 
-        if ( my $PROPS = $self->{__HEADER_PROPS} ) {
-            unless ( $PROPS == $props ) { # header_props() or header_add() is used
-                # replace %$props with %$PROPS, normalizing property names
-                $header->clear;
-                while ( my ($key, $value) = each %$PROPS ) {
-                    $header->set( $key => $value );
-                }
+        if ( $PROPS and $PROPS != $props ) { # 'header_props' or 'header_add' was used
+            # replace %$props with %$PROPS, normalizing property names
+            $header->clear;
+            while ( my ($key, $value) = each %$PROPS ) {
+                $header->set( $key => $value );
             }
         }
 
@@ -57,16 +58,16 @@ sub header {
     $header;
 }
 
-sub before_send_headers {
+sub finalize_headers {
     my $self = shift;
 
-    return if $self->header_type eq 'none';
+    $self->call_hook( 'before_finalize_headers', @_ );
 
     my %header;
     my $header = $self->header->header;
     @header{ map {"-$_"} keys %$header } = values %$header; # 'type' -> '-type'
 
-    $self->header_props( \%header );
+    $self->{__HEADER_PROPS} = \%header;
 
     return;
 }

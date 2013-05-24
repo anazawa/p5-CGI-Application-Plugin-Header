@@ -1,10 +1,17 @@
 use strict;
 use warnings;
-use Test::More tests => 1;
+use Test::More tests => 7;
 
 package MyApp;
 use parent 'CGI::Application';
 use CGI::Application::Plugin::Header 'header';
+
+__PACKAGE__->add_callback(
+    before_finalize_headers => sub {
+        my ( $self, $body_ref ) = @_;
+        $self->header( 'Content-Length' => length $$body_ref );
+    }
+);
 
 sub setup {
     my $self = shift;
@@ -28,5 +35,5 @@ is $app->header('type'), 'text/html';
 $app->header_props( type => 'text/plain' );
 is_deeply $app->header->header, { type => 'text/plain' };
 
-like $app->run, qr{^Content-Type: text/plain; charset=ISO-8859-1};
+like $app->run, qr{^Content-length: 11};
 
