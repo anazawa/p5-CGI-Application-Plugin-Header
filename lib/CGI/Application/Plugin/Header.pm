@@ -2,75 +2,70 @@ package CGI::Application::Plugin::Header;
 use 5.008_009;
 use strict;
 use warnings;
-use parent 'Exporter';
 use CGI::Header;
-use Carp qw/croak/;
+use Carp qw/carp croak/;
 
 our $VERSION = '0.01';
 
-our @EXPORT_OK = qw( header );
+our @EXPORT = qw( header header_add header_props );
 
-sub import {
-    my $caller = caller;
-    $caller->new_hook('before_finalize_headers');
-    $caller->add_callback( postrun => \&finalize_headers );
-    __PACKAGE__->export_to_level( 1, @_ );
+sub header_add {
+    my $self   = shift;
+    my @props  = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
+    my $header = $self->header;
+
+    carp "header_add called while header_type set to 'none'" if $self->header_type eq 'none';
+    croak "Odd number of elements passed to header_add" if @props % 2 != 0;
+
+    while ( my ($key, $value) = splice @props, 0, 2 ) {
+        if ( ref $value eq 'ARRAY' ) {
+            if ( $header->exists($key) ) {
+                my $old_value = $header->get( $key ); 
+                if ( ref $old_value eq 'ARRAY' ) {
+                    push @$old_value, @$value;
+                    next;
+                }
+                else {
+                    $value = [ $old_value, @$value ];
+                }
+            }
+            else {
+                $value = [ @$value ];
+            }
+        }
+        $header->set( $key => $value );
+    }
+
+    return;
+}
+
+sub header_props {
+    my $self   = shift;
+    my @props  = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
+    my $header = $self->header;
+
+    carp "header_props called while header_type set to 'none'" if @props and $self->header_type eq 'none';
+    croak "Odd number of elements passed to header_props" if @props and @props % 2 != 0;
+
+    if ( @props ) {
+        $header->clear;
+        while ( my ($key, $value) = splice @props, 0, 2 ) {
+            $header->set( $key => $value );
+        }
+    }
+    else {
+        my %props;
+        my $props = $header->header;
+        @props{ map {"-$_"} keys %$props } = values %$props; # 'type' -> '-type'
+        return %props;
+    }
+
+    return;
 }
 
 sub header {
-    my ( $self, @props ) = @_;
-
-    my $header
-        = $self->{+__PACKAGE__}
-            ||= $self->delete('header') # => $self->param('header')
-                || CGI::Header->new( query => $self->query ); # default
-
-    # make '__HEADER_PROPS' always refer to $header->header
-    $self->{__HEADER_PROPS} = do {
-        my $props = $header->header;
-        my $PROPS = $self->{__HEADER_PROPS}; # buffer
-
-        if ( $PROPS and $PROPS != $props ) { # 'header_props' or 'header_add' was used
-            # replace %$props with %$PROPS, normalizing property names
-            $header->clear;
-            while ( my ($key, $value) = each %$PROPS ) {
-                $header->set( $key => $value );
-            }
-        }
-
-        $props;
-    };
-
-    if ( @props ) {
-        if ( @props % 2 == 0 ) {
-            # merge @props into $header
-            while ( my ($key, $value) = splice @props, 0, 2 ) {
-                $header->set( $key => $value );
-            }
-        }
-        elsif ( @props == 1 ) {
-            return $header->get( shift @props );
-        }
-        else {
-            croak "Odd number of elements passed to 'header'";
-        }
-    }
-
-    $header;
-}
-
-sub finalize_headers {
     my $self = shift;
-
-    $self->call_hook( 'before_finalize_headers', @_ );
-
-    my %header;
-    my $header = $self->header->header;
-    @header{ map {"-$_"} keys %$header } = values %$header; # 'type' -> '-type'
-
-    $self->{__HEADER_PROPS} = \%header;
-
-    return;
+    $self->{+__PACKAGE__} ||= $self->delete('header') || CGI::Header->new( query => $self->query );
 }
 
 1;
