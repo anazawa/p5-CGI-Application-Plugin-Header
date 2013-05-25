@@ -25,8 +25,8 @@ SYNOPSIS
       }
 
 DESCRIPTION
-    This plugin provides you common syntax to handle CGI.pm-compatible HTTP
-    header properties.
+    This plugin provides you the common syntax to handle CGI.pm-compatible
+    HTTP header properties.
 
     By using this plugin, your application is capable of the following
     methods, where $cgiapp denotes the instance of your application which
@@ -46,8 +46,8 @@ DESCRIPTION
         "CGI::Header". For example,
 
           use My::CGI::Header;
-          my $app = MyApp->new( HEADER => My::CGI::Header->new );
-          $app->cookies({ name => 'ID', value => 123456 });
+          my $app = MyApp->new( header => My::CGI::Header->new );
+          $app->header->cookies({ name => 'ID', value => 123456 });
 
         where "My::CGI::Header" is defined as follows:
 
@@ -75,12 +75,10 @@ DESCRIPTION
     This plugin overrides the following methods of CGI::Application:
 
     $cgiapp->header_props
-        Behaves like CGI::Application's "header_props" method. Internally,
-        this method is reimplemented using $header.
+        Behaves like CGI::Application's "header_props" method.
 
     $cgiapp->header_add
-        Behaves like CGI::Application's "header_add" method. Internally,
-        this method is reimplemented using $header.
+        Behaves like CGI::Application's "header_add" method.
 
    INCOMPATIBILITY
     Header property names are normalized by $header automatically, and so
