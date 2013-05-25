@@ -107,10 +107,10 @@ CGI::Application::Plugin::Header - Plugin for handling header props.
       my $header = $self->header; # => CGI::Header object
 
       # get header props.
-      my $type = $self->header('type'); # => "text/plain"
+      my $type = $header->type; # => "text/plain"
 
       # set header props.
-      $self->header( type => "text/html" );
+      $header->type("text/html");
 
       # compatible with the core methods of CGI::Application
       $self->header_props( type => "text/plain" );
@@ -132,6 +132,17 @@ of your application which inherits from L<CGI::Application>:
 =item $header = $cgiapp->header
 
 Returns a L<CGI::Header> object associated with C<$cgiapp>.
+You can use all methods of C<$header>.
+
+  sub cgiapp_postrun {
+      my ( $self, $body_ref ) = @_;
+      $self->header->set( 'Content-Length' => length $$body_ref );
+  }
+
+You can also define your C<header> class which inherits from C<CGI::Header>:
+
+  use My::CGI::Header;
+  my $app = MyApp->new( HEADER => My::CGI::Header->new );
 
 =back
 
@@ -144,12 +155,33 @@ This plugin overrides the following methods of L<CGI::Application>:
 =item $cgiapp->header_props
 
 Behaves like L<CGI::Application>'s C<header_props> method.
+Internally, this method is reimplemented using C<$header>.
 
 =item $cgiapp->header_add
 
 Behaves like L<CGI::Application>'s C<header_add> method.
+Internally, this method is reimplemented using C<$header>.
 
 =back
+
+=head3 INCOMPATIBILITY
+
+Header property names are normalized by C<$header> automatically,
+and so this plugin breaks your code which depends on the return value of
+C<header_props>:
+
+  my %header_props = $cgiapp->header_props; # => ( -cookies => 'ID=123456' )
+
+  if ( exists $header_props{-cookie} ) {
+      ...
+  }
+
+Those codes can be rewritten using C<$header> as well as C<header_props>
+or C<header_add>:
+
+  if ( $cgiapp->header->exists('-cookie') ) {
+      ...
+  }
 
 =head1 AUTHOR
 

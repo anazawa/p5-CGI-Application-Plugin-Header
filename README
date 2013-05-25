@@ -12,10 +12,10 @@ SYNOPSIS
           my $header = $self->header; # => CGI::Header object
 
           # get header props.
-          my $type = $self->header('type'); # => "text/plain"
+          my $type = $header->type; # => "text/plain"
 
           # set header props.
-          $self->header( type => "text/html" );
+          $header->type("text/html");
 
           # compatible with the core methods of CGI::Application
           $self->header_props( type => "text/plain" );
@@ -24,53 +24,55 @@ SYNOPSIS
           ...
       }
 
-      ...
-
-      use CGI;
-      use CGI::Header;
-      use MyApp;
-
-      # you can define your CGI::Header object
-      my $app = MyApp->new(
-          PARAMS => {
-              header => CGI::Header->new( query => CGI->new ),
-          }
-      );
-
 DESCRIPTION
-  METHODS
-    This plugin exports the "header" method to your application on demand:
+    By using this plugin, your application is capable of the following
+    methods, where $cgiapp denotes the instance of your application which
+    inherits from CGI::Application:
 
-      use CGI::Application::Plugin::Header 'header';
-
-    "header" can be used as follows, where $cgiapp denotes the instance of
-    your application which inherits from CGI::Application:
-
+  ATTRIBUTES
     $header = $cgiapp->header
-        Returns a CGI::Header object associated with $cgiapp.
+        Returns a CGI::Header object associated with $cgiapp. You can use
+        all methods of $header.
 
-    $value = $cgiapp->header( $prop )
-        Returns the value of the specified property.
+          sub cgiapp_postrun {
+              my ( $self, $body_ref ) = @_;
+              $self->header->set( 'Content-Length' => length $$body_ref );
+          }
 
-    $header = $cgiapp->header( $prop => $value )
-    $header = $cgiapp->header( $p1 => $v1, $p2 => $v2, ... )
-        Given key-value pairs of header props., merges them into the
-        existing properties.
+        You can also define your "header" class which inherits from
+        "CGI::Header":
 
-  HOOKS
-    before_finalize_headers
-        This plugin finalizes header props. just before sending headers, and
-        so "header" can't be updated by the "cgiapp_postrun" hook. This hook
-        allows you add a callback which is called just before finalizing
-        header props. This hook receives a reference to the output from your
-        run mode method, in addition to $cgiapp.
+          use My::CGI::Header;
+          my $app = MyApp->new( HEADER => My::CGI::Header->new );
 
-          __PACKAGE__->add_callback(
-              before_finalize_headers => sub {
-                  my ( $self, $body_ref ) = @_;
-                  $self->header( 'Content-Length' => length $$body_ref );
-              }
-          );
+  METHODS
+    This plugin overrides the following methods of CGI::Application:
+
+    $cgiapp->header_props
+        Behaves like CGI::Application's "header_props" method. Internally,
+        this method is reimplemented using $header.
+
+    $cgiapp->header_add
+        Behaves like CGI::Application's "header_add" method. Internally,
+        this method is reimplemented using $header.
+
+   INCOMPATIBILITY
+    Header property names are normalized by $header automatically, and so
+    this plugin breaks your code which depends on the return value of
+    "header_props":
+
+      my %header_props = $cgiapp->header_props; # => ( -cookies => 'ID=123456' )
+
+      if ( exists $header_props{-cookie} ) {
+          ...
+      }
+
+    Those codes can be rewritten using $header as well as "header_props" or
+    "header_add":
+
+      if ( $cgiapp->header->exists('-cookie') ) {
+          ...
+      }
 
 AUTHOR
     Ryo Anazawa (anazawa@cpan.org)
