@@ -2,6 +2,7 @@ package CGI::Application::Plugin::Header;
 use 5.008_009;
 use strict;
 use warnings;
+use parent 'Exporter';
 use CGI::Header;
 use Carp qw/carp croak/;
 
@@ -20,19 +21,17 @@ sub header_add {
     my $header = $self->header;
 
     carp "header_add called while header_type set to 'none'" if $self->header_type eq 'none';
-
     croak "Odd number of elements passed to header_add" if @props % 2 != 0;
 
     while ( my ($key, $value) = splice @props, 0, 2 ) {
         if ( ref $value eq 'ARRAY' ) {
             if ( $header->exists($key) ) {
-                my $old_value = $header->get( $key ); 
-                if ( ref $old_value eq 'ARRAY' ) {
-                    push @$old_value, @$value;
-                    next;
+                my $existing_value = $header->get( $key ); 
+                if ( ref $existing_value eq 'ARRAY' ) {
+                    $value = [ @$existing_value, @$value ];
                 }
                 else {
-                    $value = [ $old_value, @$value ];
+                    $value = [ $existing_value, @$value ];
                 }
             }
             else {
@@ -60,7 +59,6 @@ sub header_props {
     my @props = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
 
     carp "header_props called while header_type set to 'none'" if $self->header_type eq 'none';
-
     croak "Odd number of elements passed to header_props" if @props % 2 != 0;
 
     $header->clear;
@@ -83,7 +81,7 @@ CGI::Application::Plugin::Header - Plugin for handling header props.
 
   package MyApp;
   use parent 'CGI::Application';
-  use CGI::Application::Plugin::Header 'header';
+  use CGI::Application::Plugin::Header;
 
   sub do_something {
       my $self = shift;

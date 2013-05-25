@@ -4,18 +4,16 @@ use Test::More tests => 7;
 
 package MyApp;
 use parent 'CGI::Application';
-use CGI::Application::Plugin::Header 'header';
-
-__PACKAGE__->add_callback(
-    before_finalize_headers => sub {
-        my ( $self, $body_ref ) = @_;
-        $self->header( 'Content-Length' => length $$body_ref );
-    }
-);
+use CGI::Application::Plugin::Header;
 
 sub setup {
     my $self = shift;
     $self->run_modes( start => sub { 'Hello World' } );
+}
+
+sub cgiapp_postrun {
+    my ( $self, $body ) = @_;
+    $self->header->set( 'Content-Length' => length $$body );
 }
 
 package main;
@@ -27,13 +25,17 @@ my $app = MyApp->new;
 can_ok $app, 'header';
 isa_ok $app->header, 'CGI::Header';
 
-is $app->header( type => 'text/html' ), $app->header;
-is_deeply +{ $app->header_props }, { type => 'text/html' };
-
-is $app->header('type'), 'text/html';
+$app->header->type('text/html');
+is_deeply +{ $app->header_props }, { -type => 'text/html' };
 
 $app->header_props( type => 'text/plain' );
 is_deeply $app->header->header, { type => 'text/plain' };
 
-like $app->run, qr{^Content-length: 11};
+$app->header_add( -cookie => 'foo=bar' );
+is $app->header->cookies, 'foo=bar';
+
+$app->header_add( -cookie => ['bar=baz'] );
+is_deeply $app->header->cookies, [ 'foo=bar', 'bar=baz' ];
+
+like $app->run, qr{Content-length: 11};
 
