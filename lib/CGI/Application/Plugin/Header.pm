@@ -80,6 +80,7 @@ sub header_props {
     croak "Odd number of elements passed to header_props" if @props % 2 != 0;
 
     $header->clear;
+
     while ( my ($key, $value) = splice @props, 0, 2 ) {
         $header->set( $key => $value );
     }
@@ -121,7 +122,7 @@ CGI::Application::Plugin::Header - Plugin for handling header props.
 
 =head1 DESCRIPTION
 
-This plugin provides you common syntax to handle CGI.pm-compatible
+This plugin provides you the common syntax to handle CGI.pm-compatible
 HTTP header properties.
 
 By using this plugin, your application is capable of the following methods,
@@ -146,8 +147,8 @@ You can also define your C<header> class which inherits from C<CGI::Header>.
 For example,
 
   use My::CGI::Header;
-  my $app = MyApp->new( HEADER => My::CGI::Header->new );
-  $app->cookies({ name => 'ID', value => 123456 });
+  my $app = MyApp->new( header => My::CGI::Header->new );
+  $app->header->cookies({ name => 'ID', value => 123456 });
 
 where C<My::CGI::Header> is defined as follows:
 
@@ -182,12 +183,10 @@ This plugin overrides the following methods of L<CGI::Application>:
 =item $cgiapp->header_props
 
 Behaves like L<CGI::Application>'s C<header_props> method.
-Internally, this method is reimplemented using C<$header>.
 
 =item $cgiapp->header_add
 
 Behaves like L<CGI::Application>'s C<header_add> method.
-Internally, this method is reimplemented using C<$header>.
 
 =back
 

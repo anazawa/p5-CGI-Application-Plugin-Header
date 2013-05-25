@@ -44,7 +44,7 @@ subtest 'basic' => sub {
 subtest 'BUILD' => sub {
     my $query  = CGI->new;
     my $header = CGI::Header->new( query => $query );
-    my $app    = MyApp->new( QUERY => $query, HEADER => $header );
+    my $app    = MyApp->new( query => $query, header => $header );
 
     is $app->header, $header;
 };
