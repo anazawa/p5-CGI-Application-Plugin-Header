@@ -10,9 +10,27 @@ our $VERSION = '0.01';
 
 our @EXPORT = qw( header header_add header_props );
 
+sub import {
+    my ( $class ) = @_;
+    my $caller = caller;
+    $caller->add_callback( init => \&BUILD );
+    $class->export_to_level( 1, @_ );
+}
+
+sub BUILD {
+    my $self = shift;
+    my @args = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
+
+    while ( my ($key, $value) = splice @args, 0, 2 ) {
+        $self->{+__PACKAGE__} = $value if lc $key eq 'header';
+    }
+
+    return;
+}
+
 sub header {
     my $self = shift;
-    $self->{+__PACKAGE__} ||= $self->delete('header') || CGI::Header->new( query => $self->query );
+    $self->{+__PACKAGE__} ||= CGI::Header->new( query => $self->query );
 }
 
 sub header_add {
