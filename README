@@ -4,7 +4,7 @@ NAME
 SYNOPSIS
       package MyApp;
       use parent 'CGI::Application';
-      use CGI::Application::Plugin::Header 'header';
+      use CGI::Application::Plugin::Header;
 
       sub do_something {
           my $self = shift;

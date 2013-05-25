@@ -119,29 +119,13 @@ CGI::Application::Plugin::Header - Plugin for handling header props.
       ...
   }
 
-  ...
-
-  use CGI;
-  use CGI::Header;
-  use MyApp;
-
-  # you can define your CGI::Header object
-  my $app = MyApp->new(
-      PARAMS => {
-          header => CGI::Header->new( query => CGI->new ),
-      }
-  );
-
 =head1 DESCRIPTION
 
-=head2 METHODS
-
-This plugin exports the C<header> method to your application on demand:
-
-  use CGI::Application::Plugin::Header 'header';
-
-C<header> can be used as follows, where C<$cgiapp> denotes the instance
+By using this plugin, your application is capable of the following methods,
+where C<$cgiapp> denotes the instance
 of your application which inherits from L<CGI::Application>:
+
+=head2 ATTRIBUTES
 
 =over 4
 
@@ -149,37 +133,21 @@ of your application which inherits from L<CGI::Application>:
 
 Returns a L<CGI::Header> object associated with C<$cgiapp>.
 
-=item $value = $cgiapp->header( $prop )
-
-Returns the value of the specified property.
-
-=item $header = $cgiapp->header( $prop => $value )
-
-=item $header = $cgiapp->header( $p1 => $v1, $p2 => $v2, ... )
-
-Given key-value pairs of header props., merges them into the existing
-properties.
-
 =back
 
-=head2 HOOKS
+=head2 METHODS
+
+This plugin overrides the following methods of L<CGI::Application>:
 
 =over 4
 
-=item before_finalize_headers
+=item $cgiapp->header_props
 
-This plugin finalizes header props. just before sending headers,
-and so C<header> can't be updated by the C<cgiapp_postrun> hook.
-This hook allows you add a callback which is called just before finalizing
-header props. This hook receives a reference to the output from your
-run mode method, in addition to C<$cgiapp>.
+Behaves like L<CGI::Application>'s C<header_props> method.
 
-  __PACKAGE__->add_callback(
-      before_finalize_headers => sub {
-          my ( $self, $body_ref ) = @_;
-          $self->header( 'Content-Length' => length $$body_ref );
-      }
-  );
+=item $cgiapp->header_add
+
+Behaves like L<CGI::Application>'s C<header_add> method.
 
 =back
 
