@@ -25,6 +25,9 @@ SYNOPSIS
       }
 
 DESCRIPTION
+    This plugin provides you common syntax to handle CGI.pm-compatible HTTP
+    header properties.
+
     By using this plugin, your application is capable of the following
     methods, where $cgiapp denotes the instance of your application which
     inherits from CGI::Application:
@@ -40,10 +43,33 @@ DESCRIPTION
           }
 
         You can also define your "header" class which inherits from
-        "CGI::Header":
+        "CGI::Header". For example,
 
           use My::CGI::Header;
           my $app = MyApp->new( HEADER => My::CGI::Header->new );
+          $app->cookies({ name => 'ID', value => 123456 });
+
+        where "My::CGI::Header" is defined as follows:
+
+          package My::CGI::Header;
+          use parent 'CGI::Header';
+          use CGI::Cookie;
+
+          sub cookies {
+              my $self    = shift;
+              my $cookies = $self->header->{cookies} ||= [];
+
+              return $cookies unless @_;
+
+              if ( ref $_[0] eq 'HASH' ) {
+                  push @$cookies, map { CGI::Cookie->new($_) } @_;
+              }
+              else {
+                  push @$cookies, CGI::Cookie->new( @_ );
+              }
+
+              $self;
+          }
 
   METHODS
     This plugin overrides the following methods of CGI::Application:

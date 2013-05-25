@@ -121,6 +121,9 @@ CGI::Application::Plugin::Header - Plugin for handling header props.
 
 =head1 DESCRIPTION
 
+This plugin provides you common syntax to handle CGI.pm-compatible
+HTTP header properties.
+
 By using this plugin, your application is capable of the following methods,
 where C<$cgiapp> denotes the instance
 of your application which inherits from L<CGI::Application>:
@@ -139,10 +142,34 @@ You can use all methods of C<$header>.
       $self->header->set( 'Content-Length' => length $$body_ref );
   }
 
-You can also define your C<header> class which inherits from C<CGI::Header>:
+You can also define your C<header> class which inherits from C<CGI::Header>.
+For example,
 
   use My::CGI::Header;
   my $app = MyApp->new( HEADER => My::CGI::Header->new );
+  $app->cookies({ name => 'ID', value => 123456 });
+
+where C<My::CGI::Header> is defined as follows:
+
+  package My::CGI::Header;
+  use parent 'CGI::Header';
+  use CGI::Cookie;
+
+  sub cookies {
+      my $self    = shift;
+      my $cookies = $self->header->{cookies} ||= [];
+
+      return $cookies unless @_;
+
+      if ( ref $_[0] eq 'HASH' ) {
+          push @$cookies, map { CGI::Cookie->new($_) } @_;
+      }
+      else {
+          push @$cookies, CGI::Cookie->new( @_ );
+      }
+
+      $self;
+  }
 
 =back
 
