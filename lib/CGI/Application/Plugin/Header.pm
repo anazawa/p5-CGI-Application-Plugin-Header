@@ -43,17 +43,15 @@ sub header_add {
 
     while ( my ($key, $value) = splice @props, 0, 2 ) {
         if ( ref $value eq 'ARRAY' ) {
+            $value = [ @$value ];
             if ( $header->exists($key) ) {
                 my $existing_value = $header->get( $key ); 
                 if ( ref $existing_value eq 'ARRAY' ) {
-                    $value = [ @$existing_value, @$value ];
+                    unshift @$value, @$existing_value;
                 }
                 else {
-                    $value = [ $existing_value, @$value ];
+                    unshift @$value, $existing_value;
                 }
-            }
-            else {
-                $value = [ @$value ];
             }
         }
 
