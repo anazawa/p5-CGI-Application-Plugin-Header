@@ -1,4 +1,8 @@
-Revision history for Perl extension CGI::Header.
+Revision history for Perl extension CGI::Application::Plugin::Header.
+
+0.63001  Oct 29th, 2013
+
+  - requires CGI::Header 0.63 or higher
 
 0.01  May 26th, 2013
 
