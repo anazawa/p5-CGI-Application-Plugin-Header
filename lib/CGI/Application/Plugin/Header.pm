@@ -124,6 +124,8 @@ of your application which inherits from L<CGI::Application>:
 
 =item $header = $cgiapp->header
 
+=item $header = $cgiapp->header( CGI::Header->new(...) )
+
 Returns a L<CGI::Header> object associated with C<$cgiapp>.
 You can use all methods of C<$header>.
 

@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 2;
+use Test::More tests => 3;
 
 package MyApp;
 use parent 'CGI::Application';
@@ -18,13 +18,14 @@ sub cgiapp_postrun {
 
 package main;
 
-local $ENV{CGI_APP_RETURN_ONLY} = 1;
-
 subtest 'basic' => sub {
     my $app = MyApp->new;
 
+    local $ENV{CGI_APP_RETURN_ONLY} = 1;
+
     can_ok $app, 'header';
     isa_ok $app->header, 'CGI::Header';
+    is $app->query, $app->header->query;
 
     $app->header->type('text/html');
     is_deeply +{ $app->header_props }, { -type => 'text/html' };
@@ -41,7 +42,15 @@ subtest 'basic' => sub {
     like $app->run, qr{Content-length: 11};
 };
 
-subtest 'BUILD' => sub {
+subtest '#header' => sub {
+    my $app    = MyApp->new;
+    my $header = CGI::Header->new( query => $app->query );
+
+    is $app->header($header), $header, 'setter';
+    is $app->header, $header, 'getter';
+};
+
+subtest '#BUILD' => sub {
     my $query  = CGI->new;
     my $header = CGI::Header->new( query => $query );
     my $app    = MyApp->new( query => $query, header => $header );
