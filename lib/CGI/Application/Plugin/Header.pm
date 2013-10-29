@@ -73,8 +73,6 @@ sub header_props {
     $header->clear if @_;
     $header->set(@props) if @props;
 
-    return unless wantarray;
-
     map { ( "-$_" => $props->{$_} ) } keys %$props;
 }
 
