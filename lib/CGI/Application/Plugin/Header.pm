@@ -12,7 +12,7 @@ our @EXPORT  = qw( header header_add header_props );
 sub import {
     my ( $class ) = @_;
     my $caller = caller;
-    $caller->add_callback( init => $class->can('BUILD') );
+    $caller->add_callback( init => \&BUILD );
     $class->export_to_level( 1, @_ );
 }
 
