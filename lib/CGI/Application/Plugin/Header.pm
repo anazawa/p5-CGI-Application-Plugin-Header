@@ -69,12 +69,13 @@ sub header_props {
     my $props  = $header->header;
 
     carp "header_props called while header_type set to 'none'" if @_ and $self->header_type eq 'none';
-    croak "Odd number of elements passed to header_props" if @props % 2;
 
     $header->clear if @_;
     $header->set(@props) if @props;
 
-    wantarray && map { ( "-$_" => $props->{$_} ) } keys %$props;
+    return unless wantarray;
+
+    map { ( "-$_" => $props->{$_} ) } keys %$props;
 }
 
 1;
