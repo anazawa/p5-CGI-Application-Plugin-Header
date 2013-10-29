@@ -29,6 +29,7 @@ sub BUILD {
 
 sub header {
     my $self = shift;
+    return $self->{+__PACKAGE__} = shift if @_;
     $self->{+__PACKAGE__} ||= CGI::Header->new( query => $self->query );
 }
 
@@ -70,7 +71,7 @@ sub header_props {
 
     if ( @_ ) {
         carp "header_props called while header_type set to 'none'" if $self->header_type eq 'none';
-        $header->clear->set(@props);
+        $header->clear->set(@props); # replace
     }
 
     map { ( "-$_" => $props->{$_} ) } keys %$props; # 'type' -> '-type'
