@@ -1,5 +1,7 @@
 Revision history for Perl extension CGI::Application::Plugin::Header.
 
+0.63002  Oct 30th, 2013
+
   - #header is rw
 
 0.63001  Oct 29th, 2013
