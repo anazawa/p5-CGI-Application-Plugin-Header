@@ -68,12 +68,12 @@ sub header_props {
     my $header = $self->header;
     my $props  = $header->header;
 
-    carp "header_props called while header_type set to 'none'" if @_ and $self->header_type eq 'none';
+    if ( @_ ) {
+        carp "header_props called while header_type set to 'none'" if $self->header_type eq 'none';
+        $header->clear->set(@props);
+    }
 
-    $header->clear if @_;
-    $header->set(@props) if @props;
-
-    map { ( "-$_" => $props->{$_} ) } keys %$props;
+    map { ( "-$_" => $props->{$_} ) } keys %$props; # 'type' -> '-type'
 }
 
 1;
