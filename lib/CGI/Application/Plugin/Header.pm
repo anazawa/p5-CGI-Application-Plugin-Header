@@ -7,13 +7,12 @@ use CGI::Header;
 use Carp qw/carp croak/;
 
 our $VERSION = '0.01';
-
-our @EXPORT = qw( header header_add header_props );
+our @EXPORT  = qw( header header_add header_props );
 
 sub import {
     my ( $class ) = @_;
     my $caller = caller;
-    $caller->add_callback( init => \&BUILD );
+    $caller->add_callback( init => $class->can('BUILD') );
     $class->export_to_level( 1, @_ );
 }
 
@@ -39,19 +38,21 @@ sub header_add {
     my $header = $self->header;
 
     carp "header_add called while header_type set to 'none'" if $self->header_type eq 'none';
-    croak "Odd number of elements passed to header_add" if @props % 2 != 0;
+    croak "Odd number of elements passed to header_add" if @props % 2;
 
     while ( my ($key, $value) = splice @props, 0, 2 ) {
         if ( ref $value eq 'ARRAY' ) {
-            $value = [ @$value ];
             if ( $header->exists($key) ) {
                 my $existing_value = $header->get( $key ); 
                 if ( ref $existing_value eq 'ARRAY' ) {
-                    unshift @$value, @$existing_value;
+                    $value = [ @$existing_value, @$value ];
                 }
                 else {
-                    unshift @$value, $existing_value;
+                    $value = [ $existing_value, @$value ];
                 }
+            }
+            else {
+                $value = [ @$value ];
             }
         }
 
@@ -63,27 +64,17 @@ sub header_add {
 
 sub header_props {
     my $self   = shift;
+    my @props  = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
     my $header = $self->header;
+    my $props  = $header->header;
 
-    unless ( @_ ) {
-        my %props;
-        my $props = $header->header;
-        @props{ map {"-$_"} keys %$props } = values %$props; # 'type' -> '-type'
-        return %props;
-    }
+    carp "header_props called while header_type set to 'none'" if @_ and $self->header_type eq 'none';
+    croak "Odd number of elements passed to header_props" if @props % 2;
 
-    my @props = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
+    $header->clear if @_;
+    $header->set(@props) if @props;
 
-    carp "header_props called while header_type set to 'none'" if $self->header_type eq 'none';
-    croak "Odd number of elements passed to header_props" if @props % 2 != 0;
-
-    $header->clear;
-
-    while ( my ($key, $value) = splice @props, 0, 2 ) {
-        $header->set( $key => $value );
-    }
-
-    return;
+    wantarray && map { ( "-$_" => $props->{$_} ) } keys %$props;
 }
 
 1;

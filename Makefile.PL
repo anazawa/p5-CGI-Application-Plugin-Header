@@ -7,7 +7,7 @@ repository 'https://github.com/anazawa/p5-CGI-Application-Plugin-Header';
 
 requires 'parent';
 requires 'Exporter';
-requires 'CGI::Header';
+requires 'CGI::Header' => '0.63';
 
 test_requires 'Test::More';
 test_requires 'Test::Pod';
