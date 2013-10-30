@@ -75,6 +75,11 @@ sub header_props {
         $header->clear->set(@props); # replace
     }
 
+    # TODO:
+    #   The following plugins are incompatible with this module:
+    #     - CGI::Application::Plugin::Session
+    #     - CGI::Application::Plugin::Stream
+
     map { ( "-$_" => $props->{$_} ) } keys %$props; # 'type' -> '-type'
 }
 

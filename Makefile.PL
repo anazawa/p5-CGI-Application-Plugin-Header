@@ -13,6 +13,7 @@ test_requires 'Test::More';
 test_requires 'Test::Pod';
 test_requires 'CGI::Application';
 test_requires 'CGI::Application::Plugin::Redirect' => '1.00';
+test_requires 'CGI::Application::Plugin::Stream' => '2.10';
 
 tests 't/*.t xt/*.t';
 
