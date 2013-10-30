@@ -1,6 +1,8 @@
 Revision history for Perl extension CGI::Application::Plugin::Header.
 
-  - META.yml itself was missing (it's time to stop using Module::Install?)
+0.63006
+
+  - META.yml itself was missing
   - no code changes
 
 0.63005  Oct 30th, 2013
