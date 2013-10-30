@@ -42,16 +42,11 @@ DESCRIPTION
               $self->header->set( 'Content-Length' => length $$body_ref );
           }
 
+    $header = $cgiapp->header( CGI::Header->new(...) )
         You can also define your "header" class which inherits from
         "CGI::Header". For example,
 
-          use My::CGI::Header;
-          my $app = MyApp->new( header => My::CGI::Header->new );
-          $app->header->cookies({ name => 'ID', value => 123456 });
-
-        where "My::CGI::Header" is defined as follows:
-
-          package My::CGI::Header;
+          package MyApp::Header;
           use parent 'CGI::Header';
           use CGI::Cookie;
 
@@ -71,16 +66,42 @@ DESCRIPTION
               $self;
           }
 
+        You can set "header" as follows:
+
+          # using new()
+
+          my $query  = CGI->new;
+          my $header = MyApp::Header->new( query => $query );
+          my $app    = MyApp->new( query => $query, header => $header );
+
+
+          # using header()
+
+          my $app = MyApp->new;
+
+          $app->header( MyApp::Header->new( query => $app->query ) );
+
   METHODS
     This plugin overrides the following methods of CGI::Application:
 
-    $cgiapp->header_props
-        Behaves like CGI::Application's "header_props" method.
+    %header_props = $cgiapp->header_props
+    %header_props = $cgiapp->header_props( $k1 => $v1, $k2 => $v2, ... )
+    %header_props = $cgiapp->header_props({ $k1 => $v1, $k2 => $v2, ... })
+    %header_props = $cgiapp->header_props({})
+        Behaves like CGI::Application's "header_props" method, but the
+        return format is modified. "keys" of %header_props are lowercased
+        and start with a dash. The following aliases are used:
 
-    $cgiapp->header_add
+          '-content-type' -> '-type'
+          '-cookie'       -> '-cookies'
+
+        It's guaranteed that the keys are unique.
+
+    $cgiapp->header_add( $k1 => $v1, $k2 => $v2, ... )
+    $cgiapp->header_add({ $k1 => $v1, $k2 => $v2, ... })
         Behaves like CGI::Application's "header_add" method.
 
-   INCOMPATIBILITY
+  COMPATIBILITY
     Header property names are normalized by $header automatically, and so
     this plugin breaks your code which depends on the return value of
     "header_props":
@@ -97,6 +118,41 @@ DESCRIPTION
       if ( $cgiapp->header->exists('-cookie') ) {
           ...
       }
+
+    The following plugins are compatible with this module:
+
+    CGI::Application::Plugin::Redirect
+
+    The following plugins are roughly compatible with this module:
+
+    CGI::Application::Plugin::Stream
+        "Setting a custom Content-Length/-Content-Length header" is not
+        supported by this module. In other words, the "stream_file" method
+        always overwrites the "Content-Length" header.
+
+    CGI::Application::Plugin::Session
+        You need to overwrite the "alias" table of "CGI::Header":
+
+          use parent 'CGI::Header';
+
+          sub _build_alias {
+              +{
+                  'cookies'      => 'cookie',
+                  'content-type' => 'type',
+              };
+          }
+
+          sub cookies {
+              my $self = shift;
+              return $self->header->{cookies} unless @_;
+              $self->header->{cookies} = shift;
+              $self;
+          }
+
+          sub cookie {
+              my $self = shift;
+              $self->cookies(@_);
+          }
 
 AUTHOR
     Ryo Anazawa (anazawa@cpan.org)
