@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 3;
+use Test::More tests => 5;
 
 package MyApp;
 use parent 'CGI::Application';
@@ -18,36 +18,17 @@ sub cgiapp_postrun {
 
 package main;
 
-subtest 'basic' => sub {
+subtest '#header' => sub {
     my $app = MyApp->new;
 
-    local $ENV{CGI_APP_RETURN_ONLY} = 1;
-
     can_ok $app, 'header';
-    isa_ok $app->header, 'CGI::Header';
-    is $app->query, $app->header->query;
+    isa_ok $app->header, 'CGI::Header', '#header defaults to CGI::Header object';
+    is $app->header->query, $app->query;
 
-    $app->header->type('text/html');
-    is_deeply +{ $app->header_props }, { -type => 'text/html' };
-
-    $app->header_props( -type => 'text/plain' );
-    is_deeply $app->header->header, { type => 'text/plain' };
-
-    $app->header_add( -cookie => 'foo=bar' );
-    is $app->header->cookies, 'foo=bar';
-
-    $app->header_add( -cookie => ['bar=baz'] );
-    is_deeply $app->header->cookies, [ 'foo=bar', 'bar=baz' ];
-
-    like $app->run, qr{Content-length: 11};
-};
-
-subtest '#header' => sub {
-    my $app    = MyApp->new;
     my $header = CGI::Header->new( query => $app->query );
 
-    is $app->header($header), $header, 'setter';
-    is $app->header, $header, 'getter';
+    is $app->header($header), $header, 'set #header';
+    is $app->header, $header, '#header is updated';
 };
 
 subtest '#BUILD' => sub {
@@ -58,3 +39,31 @@ subtest '#BUILD' => sub {
     is $app->header, $header;
 };
 
+subtest '#header_add' => sub {
+    my $app = MyApp->new;
+
+    $app->header_add( -cookie => 'foo=bar' );
+    is $app->header->cookies, 'foo=bar';
+
+    $app->header_add( -cookie => ['bar=baz'] );
+    is_deeply $app->header->cookies, [ 'foo=bar', 'bar=baz' ];
+
+    $app->header_add( -cookie => ['baz=qux'] );
+    is_deeply $app->header->cookies, [ 'foo=bar', 'bar=baz', 'baz=qux' ];
+};
+
+subtest '#header_props' => sub {
+    my $app = MyApp->new;
+
+    is_deeply +{ $app->header_props( -foo => 'bar' ) }, { -foo => 'bar' };
+    is_deeply $app->header->header, { foo => 'bar' };
+
+    $app->header->clear->set( -bar => 'baz' );
+    is_deeply +{ $app->header_props }, { -bar => 'baz' };
+};
+
+subtest '#run' => sub {
+    my $app = MyApp->new;
+    local $ENV{CGI_APP_RETURN_ONLY} = 1;
+    like $app->run, qr{Content-length: 11};
+};
