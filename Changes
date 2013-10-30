@@ -1,5 +1,10 @@
 Revision history for Perl extension CGI::Application::Plugin::Header.
 
+0.63005  Oct 30th, 2013
+
+  - fix META.yml ("version" was broken)
+  - no code changes
+
 0.63004  Oct 30th, 2013
 
   - add test for CGI::Application::Plugin::Stream
