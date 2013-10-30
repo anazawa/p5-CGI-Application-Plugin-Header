@@ -1,6 +1,9 @@
 Revision history for Perl extension CGI::Application::Plugin::Header.
 
+0.63004  Oct 30th, 2013
+
   - add test for CGI::Application::Plugin::Stream
+  - add tests for CGI::Application::Plugin::Session
 
 0.63003  Oct 30th, 2013
 
