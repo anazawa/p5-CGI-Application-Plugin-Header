@@ -229,6 +229,43 @@ The following plugins are compatible with this module:
 
 =back
 
+The following plugins are roughly compatible with this module:
+
+=over 4
+
+=item L<CGI::Application::Plugin::Stream>
+
+"Setting a custom Content-Length/-Content-Length header" is not supported
+by this module. In other words, the C<stream_file> method always overwrites
+the C<Content-Length> header.
+
+=item L<CGI::Application::Plugin::Session>
+
+You need to overwrite the alias table of C<CGI::Header>:
+
+  use parent 'CGI::Header';
+
+  sub _build_alias {
+      +{
+          'cookies'      => 'cookie',
+          'content-type' => 'type',
+      };
+  }
+
+  sub cookies {
+      my $self = shift;
+      return $self->header->{cookies} unless @_;
+      $self->header->{cookies} = shift;
+      $self;
+  }
+
+  sub cookie {
+      my $self = shift;
+      $self->cookies(@_);
+  }
+
+=back
+
 =head1 AUTHOR
 
 Ryo Anazawa (anazawa@cpan.org)

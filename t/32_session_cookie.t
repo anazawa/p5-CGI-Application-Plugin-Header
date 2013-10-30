@@ -1,4 +1,4 @@
-# copied and rearranged from CGI-Application-Plugin-Session's t/sessioncookie.t
+# copied and rearranged from CGI-Application-Plugin-Session's t/10_sessioncookie.t
 
 use Test::More tests => 16;
 use File::Spec;

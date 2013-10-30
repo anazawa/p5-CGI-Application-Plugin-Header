@@ -1,4 +1,4 @@
-# copied and rearranged from CGI-Application-Plugin-Session's t/sessiondelete.t
+# copied and rearranged from CGI-Application-Plugin-Session's t/11_sessiondelete.t
 
 use Test::More tests => 19;
 use File::Spec;
