@@ -139,7 +139,7 @@ like($content_sent, qr/Content-type/i,$test_name);
 #################
 
 package StreamTest;
-use base 'CGI::Application';
+use parent 'CGI::Application';
 use CGI::Application::Plugin::Stream (qw/stream_file/);
 use CGI::Application::Plugin::Header;
 
