@@ -12,6 +12,7 @@ requires 'CGI::Header' => '0.63';
 test_requires 'Test::More';
 test_requires 'Test::Pod';
 test_requires 'CGI::Application';
+test_requires 'CGI::Application::Plugin::Redirect' => '1.00';
 
 tests 't/*.t xt/*.t';
 
