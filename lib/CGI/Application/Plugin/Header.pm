@@ -6,7 +6,7 @@ use parent 'Exporter';
 use CGI::Header;
 use Carp qw/carp croak/;
 
-our $VERSION = '0.63002';
+our $VERSION = '0.63003';
 our @EXPORT  = qw( header header_add header_props );
 
 sub import {
@@ -197,7 +197,7 @@ Behaves like L<CGI::Application>'s C<header_add> method.
 
 =back
 
-=head3 INCOMPATIBILITY
+=head2 COMPATIBILITY
 
 Header property names are normalized by C<$header> automatically,
 and so this plugin breaks your code which depends on the return value of
@@ -215,6 +215,14 @@ or C<header_add>:
   if ( $cgiapp->header->exists('-cookie') ) {
       ...
   }
+
+The following plugins are compatible with this module:
+
+=over 4
+
+=item L<CGI::Application::Plugin::Redirect>
+
+=back
 
 =head1 AUTHOR
 

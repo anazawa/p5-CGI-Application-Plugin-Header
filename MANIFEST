@@ -17,3 +17,4 @@ README
 t/00_compile.t
 t/10_basic.t
 t/20_header_props.t
+t/30_redirect.t
