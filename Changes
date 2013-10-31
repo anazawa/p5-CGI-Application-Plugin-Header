@@ -1,5 +1,7 @@
 Revision history for Perl extension CGI::Application::Plugin::Header.
 
+0.63007  Oct 31st, 2013
+
   - skip t/33_session_delete.t due to CAP::Session's bug, RT#81611
     (thanks to CPAN testers)
 

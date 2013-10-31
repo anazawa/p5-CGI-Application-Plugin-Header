@@ -6,7 +6,7 @@ use parent 'Exporter';
 use CGI::Header;
 use Carp qw/carp croak/;
 
-our $VERSION = '0.63006';
+our $VERSION = '0.63007';
 our @EXPORT  = qw( header header_add header_props );
 
 sub import {
