@@ -14,7 +14,7 @@ test_requires 'Test::Pod';
 test_requires 'CGI::Application';
 test_requires 'CGI::Application::Plugin::Redirect' => '1.00';
 test_requires 'CGI::Application::Plugin::Stream' => '2.10';
-test_requires 'CGI::Application::Plugin::Session' => '1.03';
+test_requires 'CGI::Application::Plugin::Session' => '1.04';
 
 tests 't/*.t xt/*.t';
 
