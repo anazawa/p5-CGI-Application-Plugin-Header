@@ -1,5 +1,7 @@
 Revision history for Perl extension CGI::Application::Plugin::Header.
 
+0.63008  Nov 15th, 2013
+
   - tests require CAP::Session 1.04 or higher
   - Since RT#81611 is closed, t/33_session_delete.t is not skipped anymore
 
